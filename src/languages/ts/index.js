@@ -2366,8 +2366,14 @@ function needs_parens(node, parent, is_right) {
 	if (node.type === 'PrivateIdentifier') return false;
 
 	if (!is_right && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression')) {
-		// `**` would be invalid, `&`/`|` would be swallowed into the trailing type
-		return parent.operator === '**' || parent.operator === '&' || parent.operator === '|';
+		// these get swallowed into the trailing type without parens: `**` (invalid),
+		// `&`/`|` (intersection/union), or a `<`-led operator (`<`/`<=`/`<<` → `T<…>`)
+		return (
+			parent.operator === '**' ||
+			parent.operator === '&' ||
+			parent.operator === '|' ||
+			parent.operator[0] === '<'
+		);
 	}
 
 	// special case where logical expressions and coalesce expressions cannot be mixed,
